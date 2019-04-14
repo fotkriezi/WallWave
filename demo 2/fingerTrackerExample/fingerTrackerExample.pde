@@ -103,20 +103,20 @@ void draw() {
     pos[2] = (int)dist(avgX, avgY, 0, 424);
     pos[3] = (int)dist(avgX, avgY, 512, 424);
     
-    String out = "<" + convertDist(pos[0]) + "," + convertDist(pos[1]) + "," + convertDist(pos[2]) + "," + convertDist(pos[3]) + ">" ;
+    String out = "<" + convertDist(pos[0], false) + "," + convertDist(pos[1], true) + "," + convertDist(pos[2], false) + "," + convertDist(pos[3],true) + ">" ;
     if (countLoops % 60 == 0) {
       port.write(out);
       print("SENT DATAPOINT");
     }
     countLoops++;
     
-    print(convertDist(pos[0]));
+    print(convertDist(pos[0], false));
     print(", ");
-    print(convertDist(pos[1]));
+    print(convertDist(pos[1], true));
     print(", ");
-    print(convertDist(pos[2]));
+    print(convertDist(pos[2], false));
     print(", ");
-    println(convertDist(pos[3]));
+    println(convertDist(pos[3], true));
   }
   
   // TODO: use serial communication to send 
@@ -143,13 +143,18 @@ void keyPressed(){
   }
 }
 
-int convertDist(int d) {
+int convertDist(int d, boolean reverse) {
   if(d < 100) {
+    if (reverse) {
+      return 0;
+    }
     return 2;
   }
   if(d < 200) {
     return 1;
   }
-  
+  if (reverse) {
+      return 2;
+    }
   return 0;
 }

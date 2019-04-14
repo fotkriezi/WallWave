@@ -16,7 +16,7 @@ Servo servos[4] = {myservo0, myservo1, myservo2, myservo3};
 // 0: fully extended
 // 1: middle
 // 2: fully retracted
-int servosPosition[4] = {0,0,0,0};
+int servosPosition[4] = {0,2,0,2};
 
 void setup() {
   
@@ -27,12 +27,12 @@ void setup() {
 
     // SERVOS
     servos[0].attach(13);  // attaches the servo on pin 13 to the servo object
-    servos[1].attach(12);
-    servos[2].attach(27);
+    servos[1].attach(27);
+    servos[2].attach(12);
     servos[3].attach(33);
 
     servos[0].write(0);
-    servos[1].write(2);
+    servos[1].write(90);
     
     Serial.begin(9600);
 }
@@ -55,7 +55,7 @@ void loop() {
         lcd.print(down_right);
         
         updatePosition(up_left - '0', 0);
-//        updatePosition(up_right - '0', 1);
+        updatePosition(up_right - '0', 1);
     }
 }
 
