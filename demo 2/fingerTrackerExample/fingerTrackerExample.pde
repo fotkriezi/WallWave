@@ -22,6 +22,8 @@ String portName = "/dev/tty.SLAB_USBtoUART";
 
 boolean traceOutline = true;
 
+int countLoops = 0;
+
 void setup() {
   size(512, 424);
   port = new Serial(this, portName, 9600); // change to index of ardunio port name
@@ -102,7 +104,11 @@ void draw() {
     pos[3] = (int)dist(avgX, avgY, 512, 424);
     
     String out = "<" + convertDist(pos[0]) + "," + convertDist(pos[1]) + "," + convertDist(pos[2]) + "," + convertDist(pos[3]) + ">" ;
-    port.write(out);
+    if (countLoops % 60 == 0) {
+      port.write(out);
+      print("SENT DATAPOINT");
+    }
+    countLoops++;
     
     print(convertDist(pos[0]));
     print(", ");
