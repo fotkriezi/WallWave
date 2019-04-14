@@ -30,6 +30,9 @@ void setup() {
     servos[1].attach(12);
     servos[2].attach(27);
     servos[3].attach(33);
+
+    servos[0].write(0);
+    servos[1].write(2);
     
     Serial.begin(9600);
 }
@@ -51,39 +54,46 @@ void loop() {
         lcd.print(down_left);
         lcd.print(down_right);
         
-        updatePosition((int) up_left, 0);
+        updatePosition(up_left - '0', 0);
+//        updatePosition(up_right - '0', 1);
     }
-    delay(300);
 }
 
 void updatePosition(int target_pos, int servoNum) {
+  lcd.print("HERE");
+  lcd.print(target_pos);
   int current_pos = servosPosition[servoNum];
+  lcd.print(current_pos);
   if (current_pos < target_pos) {
-    int num_stages = target_pos - current_pos;
-    backward(num_stages, servoNum);
+    forward(target_pos, servoNum);
   } else if (current_pos > target_pos) {
-    int num_stages = current_pos - target_pos;
-    forward(num_stages, servoNum);
+    backward(target_pos, servoNum);
   }
 }
 
-void forward(int numStages, int servoNum) {
-  int current_degrees = servosPosition[servoNum]*30;
-  int target_degrees = 30*numStages;
+void forward(int target_pos, int servoNum) {
+  lcd.print("FORWARD");
+  int current_pos = servosPosition[servoNum];
+
+  int current_degrees = servosPosition[servoNum]*45;
+  int target_degrees = 45*target_pos - 1;
   for (int pos = current_degrees; pos <= target_degrees; pos += 1) { 
     servos[servoNum].write(pos); // in steps of 1 degree       
-    delay(5);
+    delay(1);
   }
+  servosPosition[servoNum] = target_pos;
 }
 
-void backward(int numStages, int servoNum) {
-  int current_degrees = servosPosition[servoNum]*30;
-  int target_degrees = 30*numStages;
+void backward(int target_pos, int servoNum) {
+  lcd.print("BACKWARDS");
+  
+  int current_pos = servosPosition[servoNum];
+
+  int current_degrees = servosPosition[servoNum]*45;
+  int target_degrees = 45*target_pos - 1;
   for (int pos = current_degrees; pos >= target_degrees; pos -= 1) { 
-    servos[servoNum].write(pos); // in steps of 1 degree       
-    delay(5);
+    servos[servoNum].write(pos); // in steps of 1 degree
+    delay(1);
   }
+  servosPosition[servoNum] = target_pos;
 }
-
-
-
