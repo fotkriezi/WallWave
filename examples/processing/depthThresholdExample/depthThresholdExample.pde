@@ -1,14 +1,18 @@
 import org.openkinect.processing.*;
+import processing.serial.*;
 
 Kinect2 kinect;
 PImage img; // create image
 int thresh = 300;
 int c = 1200;
 
+Serial port;
+String portName = "/dev/cu.usbmodem14101";
+
 void setup() {
   size(512, 424);
   kinect = new Kinect2(this);
-  
+  port = new Serial(this, portName, 19200);
   kinect.initDepth(); // initializes depthImage/depthCamera
   kinect.initDevice();
   img = createImage(kinect.depthWidth, kinect.depthHeight, RGB); // init image
@@ -50,21 +54,30 @@ void draw() {
     fill(255, 0, 0);
     ellipse((int)sumX/count, (int)sumY/count, 50, 50);
     rect((int)sumX/count - 150/2, (int)sumY/count - 300/2, 150, 300);
-  }
-  int rectX = (int)sumX/count - 150/2;
-  int rectY = (int)sumY/count - 300/2;
-  int w = 150;
-  int h = 300;
-  int[] out = 
   
-  for(int y = 0; y < 424; y += 141) {
-    for(int x = 0; x < 512; x += 512) {
-      if(y >= rectY && y <= rectY + h) {
-        
+    int rectX = (int)sumX/count - 150/2;
+    int rectY = (int)sumY/count - 300/2;
+    int w = 150;
+    int h = 300;
+    String out = "";
+  
+    for(int y = 0; y < 424; y += 141) {
+      for(int x = 0; x < 512; x += 85) {
+        if(y >= rectY && y <= rectY + h && x >= rectX && x <= rectX + w) {
+          out += "1";
+          print("1");
+        }
+        else {
+          out += '0';
+          print("0");
+        }
       }
+      println();
     }
+    println();
+    port.write(out);
+    print(out);
   }
-  
   fill(255,0,0);
   text(thresh, 10, 20);
 }
