@@ -26,7 +26,7 @@ int countLoops = 0;
 
 void setup() {
   size(512, 424);
-  port = new Serial(this, portName, 9600); // change to index of ardunio port name
+  //port = new Serial(this, portName, 9600); // change to index of ardunio port name
   
   // initialize your SimpleOpenNI object
   // and set it up to access the depth image
@@ -105,7 +105,7 @@ void draw() {
     
     String out = "<" + convertDist(pos[0], false) + "," + convertDist(pos[1], true) + "," + convertDist(pos[2], false) + "," + convertDist(pos[3],true) + ">" ;
     if (countLoops % 60 == 0) {
-      port.write(out);
+      //port.write(out);
       print("SENT DATAPOINT");
     }
     countLoops++;

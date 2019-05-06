@@ -1,3 +1,4 @@
+import processing.serial.*;
 import org.openkinect.processing.*;
 
 Kinect2 kinect;
@@ -12,8 +13,8 @@ void setup() {
 
 void draw() { 
   background(0);
-  outBasicDepthImage();
-  // outDepthImgAtResolution(5);
+  // outBasicDepthImage();
+  outDepthImgAtResolution(85);
 }
 
 void outBasicDepthImage() {
@@ -24,13 +25,15 @@ void outBasicDepthImage() {
 void outDepthImgAtResolution(int skip) {
   PImage img = kinect.getDepthImage(); // store depth image feed in variable
   image(img, 0, 0); // output image on screen
-  
   for(int x = 0; x < img.width; x+=skip) {
     for(int y = 0; y < img.height; y+=skip) {
       int index = x + y * img.width;
       float b = brightness(img.pixels[index]);
       fill(b);
       rect(x, y, skip, skip);
+      print(x);
+      print(", ");
+      print(y);
     }
   }
 }
