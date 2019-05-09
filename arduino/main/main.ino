@@ -33,59 +33,66 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x42);
 // have!
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
+#define INCREMENT 100
+#define FORWARD 0
+#define BACKWARD 1
 
-// our servo # counter
-uint8_t servonum = 0;
-int motor_states[14] = {SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN, SERVOMIN};
+uint16_t motor_angles[14] = {SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN};
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("8 channel Servo test!");
+  // Serial.println("14 channel Servo test!");
+  
   pwm.begin();
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 
+  // reset all motors to state 0 i.e. arm fully extended
   for(int motor = 0; motor < 14; motor++) {
     for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX/2; pulselen++) {
-            pwm.setPWM(motor, 0, pulselen);
+       pwm.setPWM(motor, 0, pulselen);
     }
-    motor_states[motor] = SERVOMAX/2;
+    motor_angles[motor] = SERVOMAX/2;
   }
-
   delay(10);
-}
-
-// you can use this function if you'd like to set the pulse length in seconds
-// e.g. setServoPulse(0, 0.001) is a ~1 millisecond pulse width. its not precise!
-void setServoPulse(uint8_t n, double pulse) {
-  double pulselength;
-  
-  pulselength = 1000000;   // 1,000,000 us per second
-  pulselength /= 60;   // 60 Hz
-  Serial.print(pulselength); Serial.println(" us per period"); 
-  pulselength /= 4096;  // 12 bits of resolution
-  Serial.print(pulselength); Serial.println(" us per bit"); 
-  pulse *= 1000000;  // convert to us
-  pulse /= pulselength;
-  Serial.println(pulse);
-  pwm.setPWM(n, 0, pulse);
+  Serial.write('*');
 }
 
 void loop() {
-  if(Serial.available()) {
+  if(Serial.available() > 1) {
     String in = Serial.readString();
-    for(int i = 0; i < 15; i++) {
-      char state = in.charAt(i);
-      if(state == '0') {
-          for (uint16_t pulselen = motor_states[i]; pulselen < SERVOMAX/2; pulselen++) {
-            pwm.setPWM(i, 0, pulselen);
-          }
-          motor_states[i] = SERVOMAX/2;
-      } else if(state == '1') {
-        for (uint16_t pulselen = motor_states[i]; pulselen > SERVOMIN; pulselen--) {
-            pwm.setPWM(i, 0, pulselen);
-          }
-          motor_states[i] = SERVOMIN;
-      }
+    for(int i = 0; i < 14; i++) { 
+      int state = in.charAt(i) - '0';
+      Serial.print(state);
+      // update_step(i, state);
+      update_smooth(i, state);
     }
+    Serial.write('*');
+    Serial.println();
   }
+}
+
+void update_step(int i, int state) {
+      if(state == FORWARD && motor_angles[i] < SERVOMAX/2) {
+        motor_angles[i] = motor_angles[i] + INCREMENT;
+        pwm.setPWM(i, 0, motor_angles[i]);
+      } else if (state == BACKWARD && motor_angles[i] > SERVOMIN) {
+        motor_angles[i] = motor_angles[i] - INCREMENT;
+        pwm.setPWM(i, 0, motor_angles[i]);
+      }
+}
+
+void update_smooth(int i, int state) {
+    if(state == FORWARD && motor_angles[i] < SERVOMAX/2) {
+        for (uint16_t pulselen = motor_angles[i]; pulselen < motor_angles[i] + INCREMENT; pulselen++) {
+            pwm.setPWM(i, 0, pulselen);
+            delay(1);
+        }
+        motor_angles[i] = motor_angles[i] + INCREMENT;
+    } else if (state == BACKWARD && motor_angles[i] > SERVOMIN) {
+        for (uint16_t pulselen = motor_angles[i]; pulselen > motor_angles[i] - INCREMENT; pulselen--) {
+            pwm.setPWM(i, 0, pulselen);
+            delay(1);
+        }
+        motor_angles[i] = motor_angles[i] - INCREMENT;
+    }
 }
