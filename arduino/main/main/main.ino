@@ -52,15 +52,36 @@ void setup() {
   pwm2.begin();
   pwm2.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 
+  int goalpulse;
   // reset all motors to state 0 i.e. arm fully extended
   for(int motor = 0; motor < 14; motor++) {
-    for (uint16_t pulselen = SERVOMIN; pulselen <= SERVOMAX/2; pulselen++) {
+    if (motor == 6 || motor == 13) {
+      for (uint16_t pulselen = SERVOMAX/2; pulselen >= SERVOMIN; pulselen--) {
        pwm1.setPWM(motor, 0, pulselen);
-       pwm2.setPWM(motor, 0, pulselen);
+      }
+      motor_angles1[motor] = SERVOMIN;
+    } else {
+      for (uint16_t pulselen = SERVOMIN; pulselen <= SERVOMAX/2; pulselen++) {
+       pwm1.setPWM(motor, 0, pulselen);
+      }
+      motor_angles1[motor] = SERVOMAX/2;
     }
-    motor_angles1[motor] = SERVOMAX/2;
-    motor_angles2[motor] = SERVOMAX/2;
   }
+
+  for(int motor = 0; motor < 14; motor++) {
+    if (motor >= 6 && motor < 13) {
+      for (uint16_t pulselen = SERVOMAX/2; pulselen >= SERVOMIN; pulselen--) {
+       pwm2.setPWM(motor, 0, pulselen);
+      }
+      motor_angles2[motor] = SERVOMIN;
+    } else {
+      for (uint16_t pulselen = SERVOMIN; pulselen <= SERVOMAX/2; pulselen++) {
+       pwm2.setPWM(motor, 0, pulselen);
+      }
+      motor_angles2[motor] = SERVOMAX/2;
+    }
+  }
+  
   delay(10);
   Serial.setTimeout(50); // Added this to speed up communication of arduino + processing
   Serial.write('*');
@@ -73,7 +94,14 @@ void loop() {
     for(int i = 0; i < 14; i++) { 
       char state1 = in.charAt(i);
       char state2 = in.charAt(i+14);
+      if(i == 6 || i == 13) {
+        state1 = state1 == FORWARD ? BACKWARD : FORWARD;   // to account for the last column being flipped
+        state2 = state2 == FORWARD ? BACKWARD : FORWARD;   // to account for the last column being flipped
+      }
       update_smooth(i, state1, motor_angles1, pwm1);
+      if(i > 6) { // if its the bottom row (4th row only)
+        state2 = state2 == FORWARD ? BACKWARD : FORWARD; // account for last row being upside down
+      }
       update_smooth(i, state2, motor_angles2, pwm2);
     }
     Serial.write('*');

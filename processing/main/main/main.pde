@@ -67,18 +67,18 @@ void draw() {
       
       StringBuilder out = new StringBuilder();
       for(int y = 0; y <= 424; y += 141) {
-        for(int x = 0; x < 512; x += 85) {
+        for(int x = 512; x > 0; x -= 85) {
           if(y >= rectY && y <= rectY + h && x >= rectX && x <= rectX + w) {
-            out.append('1');
-            //print("1");
-          } else {
             out.append('0');
-            //print("0");
+            print("1");
+          } else {
+            out.append('1');
+            print("0");
           }
         }
-        //println();
+        println();
       }
-      //println();
+      println();
        port.clear();
        port.write(out.toString());
     }
