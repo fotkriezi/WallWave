@@ -33,9 +33,9 @@
 // have!
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
-#define INCREMENT 75
-#define FORWARD 1
-#define BACKWARD 0
+#define INCREMENT 75 // TRY TUNING FOR DEMO
+#define FORWARD '1'
+#define BACKWARD '0'
 
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(&Wire, 0x42);
 Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(&Wire, 0x41);
@@ -45,7 +45,6 @@ uint16_t motor_angles2[14] = {SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVOMIN,SERVO
 
 void setup() {
   Serial.begin(9600);
-  // Serial.println("28 channel Servo test!");
   
   pwm1.begin();
   pwm1.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
@@ -55,7 +54,7 @@ void setup() {
 
   // reset all motors to state 0 i.e. arm fully extended
   for(int motor = 0; motor < 14; motor++) {
-    for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX/2; pulselen++) {
+    for (uint16_t pulselen = SERVOMIN; pulselen <= SERVOMAX/2; pulselen++) {
        pwm1.setPWM(motor, 0, pulselen);
        pwm2.setPWM(motor, 0, pulselen);
     }
@@ -63,27 +62,25 @@ void setup() {
     motor_angles2[motor] = SERVOMAX/2;
   }
   delay(10);
+  Serial.setTimeout(50); // Added this to speed up communication of arduino + processing
   Serial.write('*');
+  
 }
 
 void loop() {
   if(Serial.available() > 1) {
     String in = Serial.readString();
     for(int i = 0; i < 14; i++) { 
-      int state1 = in.charAt(i) - '0';
-      int state2 = in.charAt(i+14) - '0';
-//      Serial.print(state1);
-//      Serial.print(state2);
-      // update_step(i, state);
+      char state1 = in.charAt(i);
+      char state2 = in.charAt(i+14);
       update_smooth(i, state1, motor_angles1, pwm1);
       update_smooth(i, state2, motor_angles2, pwm2);
     }
     Serial.write('*');
-    Serial.println();
   }
 }
 
-void update_step(int i, int state, uint16_t* motor_angles, Adafruit_PWMServoDriver pwm) {
+void update_step(int i, char state, uint16_t* motor_angles, Adafruit_PWMServoDriver pwm) {
       if(state == FORWARD && motor_angles1[i] < SERVOMAX/2) {
         motor_angles[i] = motor_angles[i] + INCREMENT;
         pwm.setPWM(i, 0, motor_angles[i]);
@@ -93,15 +90,17 @@ void update_step(int i, int state, uint16_t* motor_angles, Adafruit_PWMServoDriv
       }
 }
 
-void update_smooth(int i, int state, uint16_t* motor_angles, Adafruit_PWMServoDriver pwm) {
+void update_smooth(int i, char state, uint16_t* motor_angles, Adafruit_PWMServoDriver pwm) {
     if (state == FORWARD && motor_angles[i] < SERVOMAX/2) {
         for (uint16_t pulselen = motor_angles[i]; pulselen <= motor_angles[i] + INCREMENT; pulselen++) { // todo
             pwm.setPWM(i, 0, pulselen);
+            delay(2);
         }
         motor_angles[i] = motor_angles[i] + INCREMENT; // todo
     } else if (state == BACKWARD && motor_angles[i] > SERVOMIN) {
         for (uint16_t pulselen = motor_angles[i]; pulselen >= motor_angles[i] - INCREMENT; pulselen--) {
             pwm.setPWM(i, 0, pulselen);
+            delay(2);
         }
         motor_angles[i] = motor_angles[i] - INCREMENT;
     }

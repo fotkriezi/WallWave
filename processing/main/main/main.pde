@@ -8,6 +8,7 @@ int c = 1200;
 
 Serial port;
 String portName = "/dev/cu.usbmodem14101";
+boolean first = false;
 
 void setup() {
   size(512, 424);
@@ -54,36 +55,32 @@ void draw() {
   
   // DRAW SHAPES
   if(count != 0) {
-    fill(255, 0, 0);
-    // ellipse((int)sumX/count, (int)sumY/count, 50, 50);
-    // rect((int)sumX/count - 150/2, (int)sumY/count - 300/2, 150, 300);
-
-    int w = 130;
-    int h = 400;
-    int rectX = (int)sumX/count - w/2;
-    int rectY = (int)sumY/count - h/2;
-    rect(rectX, rectY, w, h);
-    
-    StringBuilder out = new StringBuilder();
-    for(int y = 0; y <= 424; y += 141) {
-      for(int x = 0; x < 512; x += 85) {
-        if(y >= rectY && y <= rectY + h && x >= rectX && x <= rectX + w) {
-          out.append('1');
-          print("1");
-        } else {
-          out.append('0');
-          print("0");
-        }
-      }
-      println();
-    }
-    println();
-    
-    // SERIAL AND SYNC
     if (port.available() > 0) {
-      print("RECEIVED ACK\n");
-      port.clear();
-      port.write(out.toString());
+      //print("RECEIVED ACK\n");
+      fill(255, 0, 0);
+  
+      int w = 130;
+      int h = 424; // Should potentially make this higher for DEMO
+      int rectX = (int)sumX/count - w/2;
+      int rectY = (int)sumY/count - h/2;
+      rect(rectX, rectY, w, h);
+      
+      StringBuilder out = new StringBuilder();
+      for(int y = 0; y <= 424; y += 141) {
+        for(int x = 0; x < 512; x += 85) {
+          if(y >= rectY && y <= rectY + h && x >= rectX && x <= rectX + w) {
+            out.append('1');
+            //print("1");
+          } else {
+            out.append('0');
+            //print("0");
+          }
+        }
+        //println();
+      }
+      //println();
+       port.clear();
+       port.write(out.toString());
     }
   }
 }
