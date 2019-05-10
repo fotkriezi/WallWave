@@ -49,13 +49,37 @@ void loop() {
       for (int motor_idx = 0; motor_idx < 14; motor_idx++) {
         if (motor_idx % 2 == 0) { // Case for even motors
           int pulselen = SERVOMAX / 2 - i;
-          pwm1.setPWM(motor_idx, 0, pulselen);
-          pwm2.setPWM(motor_idx, 0, pulselen);
+       
+          if (motor_idx == 6 || motor_idx == 13) {
+            pwm1.setPWM(motor_idx, 0, SERVOMIN + i);
+          }
+          else {
+            pwm1.setPWM(motor_idx, 0, pulselen);
+          }
+          
+          if (motor_idx >= 6 && motor_idx < 13) {
+            pwm2.setPWM(motor_idx, 0, SERVOMIN + i);
+          }
+          else {
+            pwm2.setPWM(motor_idx, 0, pulselen);
+          }
+          
         }
         else { // Case for odd motors
           int pulselen = SERVOMIN + i;
-          pwm1.setPWM(motor_idx, 0, pulselen);
-          pwm2.setPWM(motor_idx, 0, pulselen);
+          if (motor_idx == 6 || motor_idx == 13) {
+            pwm1.setPWM(motor_idx, 0, SERVOMAX / 2 - i);
+          }
+          else {
+            pwm1.setPWM(motor_idx, 0, pulselen);
+          }
+          
+          if (motor_idx >= 6 && motor_idx < 13) {
+            pwm2.setPWM(motor_idx, 0, SERVOMAX / 2 - i);
+          }
+          else {
+            pwm2.setPWM(motor_idx, 0, pulselen);
+          }
         }
       }
     }
@@ -65,15 +89,33 @@ void loop() {
       for (int motor_idx = 0; motor_idx < 14; motor_idx++) {
         if (motor_idx % 2 == 0) { // Case for even motors
           int pulselen = SERVOMIN + i;
-          pwm1.setPWM(motor_idx, 0, pulselen);
-          pwm2.setPWM(motor_idx, 0, pulselen);
-//          delay(1);
+          if (motor_idx == 6 || motor_idx == 13) {
+            pwm1.setPWM(motor_idx, 0, SERVOMAX / 2 - i);
+          }
+          else {
+            pwm1.setPWM(motor_idx, 0, pulselen);
+          }
+          if (motor_idx >= 6 && motor_idx < 13)  {
+            pwm2.setPWM(motor_idx, 0, SERVOMAX / 2 - i);
+          }
+          else {
+            pwm2.setPWM(motor_idx, 0, pulselen);
+          }
         }
         else { // Case for odd motors
           int pulselen = SERVOMAX / 2 - i;
-          pwm1.setPWM(motor_idx, 0, pulselen);
-          pwm2.setPWM(motor_idx, 0, pulselen);
-//          delay(1);
+          if (motor_idx == 6 || motor_idx == 13) {
+            pwm1.setPWM(motor_idx, 0, SERVOMIN + i);
+          }
+          else {
+            pwm1.setPWM(motor_idx, 0, pulselen);
+          }
+          if (motor_idx >= 6 && motor_idx < 13)  {
+            pwm2.setPWM(motor_idx, 0, SERVOMIN + i);
+          }
+          else {
+            pwm2.setPWM(motor_idx, 0, pulselen);
+          }
         }
       }
     }
